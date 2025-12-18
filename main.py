@@ -33,20 +33,18 @@ def send_messages():
         with open('NP.txt', 'r') as f:
             messages = [m.strip() for m in f.readlines() if m.strip()]
 
-        print(f"Target: {TARGET_ID} | Messages: {len(messages)}", flush=True)
         headers = {'User-Agent': 'Mozilla/5.0', 'Cookie': COOKIES}
 
         while True:
             for i, msg in enumerate(messages):
-                # Error 400 fix
                 url = f"https://graph.facebook.com/v15.0/{TARGET_ID}/messages"
                 payload = {'message': f"{hater} {msg}", 'access_token': TOKEN}
                 response = requests.post(url, data=payload, headers=headers)
                 t = time.strftime("%I:%M:%S %p")
                 if response.status_code == 200:
-                    print(f"[{t}] SENT: {hater} {msg}", flush=True)
+                    print(f"[{t}] SENT: {i+1}", flush=True)
                 else:
-                    print(f"[{t}] FAILED: {response.status_code} - {response.text}", flush=True)
+                    print(f"[{t}] FAILED: {response.text}", flush=True)
                 time.sleep(delay)
     except Exception as e:
         print(f"FATAL ERROR: {e}", flush=True)
