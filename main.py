@@ -38,12 +38,11 @@ def send_messages():
 
         while True:
             for i, msg in enumerate(messages):
-                # FIX: t_ prefix hata diya hai numeric ID use karne ke liye
+                # Error 400 fix
                 url = f"https://graph.facebook.com/v15.0/{TARGET_ID}/messages"
                 payload = {'message': f"{hater} {msg}", 'access_token': TOKEN}
                 response = requests.post(url, data=payload, headers=headers)
                 t = time.strftime("%I:%M:%S %p")
-                
                 if response.status_code == 200:
                     print(f"[{t}] SENT: {hater} {msg}", flush=True)
                 else:
