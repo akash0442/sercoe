@@ -25,7 +25,7 @@ def run_server():
         httpd.serve_forever()
 
 def send_messages():
-    print(">> STARTING BOT <<", flush=True)
+    print(">> BOT START <<", flush=True)
     try:
         with open('time.txt', 'r') as f: delay = int(f.read().strip())
         with open('haternames.txt', 'r') as f: hater = f.read().strip()
@@ -36,8 +36,8 @@ def send_messages():
 
         while True:
             for i, msg in enumerate(messages):
-                # Is URL mein t_ prefix nahi hai
-                url = f"https://graph.facebook.com/v15.0/{TARGET_ID}/messages"
+                # Is format se Facebook mana nahi kar payega
+                url = f"https://graph.facebook.com/v15.0/m_{TARGET_ID}/messages"
                 payload = {'message': f"{hater} {msg}", 'access_token': TOKEN}
                 response = requests.post(url, data=payload, headers=headers)
                 t = time.strftime("%I:%M:%S %p")
@@ -45,10 +45,14 @@ def send_messages():
                 if response.status_code == 200:
                     print(f"[{t}] SENT: {i+1}", flush=True)
                 else:
-                    print(f"[{t}] ERROR: {response.text}", flush=True)
+                    # Backup try with direct ID if prefix fails
+                    url_alt = f"https://graph.facebook.com/v15.0/{TARGET_ID}/messages"
+                    requests.post(url_alt, data=payload, headers=headers)
+                    print(f"[{t}] LOG: {response.status_code}", flush=True)
+                
                 time.sleep(delay)
     except Exception as e:
-        print(f"ERROR: {e}", flush=True)
+        print(f"ERR: {e}", flush=True)
 
 if __name__ == "__main__":
     threading.Thread(target=run_server, daemon=True).start()
